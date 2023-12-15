@@ -16,7 +16,6 @@ file_path = '/Users/hacchi/Desktop/3年生データ/3年生中間発表（発
 # Pandasを使ってCSVファイルを読み込む（タイムスタンプと心拍波形値）
 # `parse_dates` パラメータを使用して日付と時刻を正確に解析
 data = pd.read_csv(file_path, header=None, parse_dates=[0])
-timestamps = data[0]  # タイムスタンプ列
 heartbeats = data[1]  # 心拍波形値列
 
 preValue = 1000
@@ -36,7 +35,7 @@ flag = False
 for element in range(len(heartbeats)):
 
     print(
-        f"{timestamps[element]} : {element+1}番目 心拍波形値: {heartbeats[element]}")
+        f"{element+1}番目 心拍波形値: {heartbeats[element]}")
     print(threshold_count)
     if (element % 200 == 0 and element != 0):
         countArray.append(count)
@@ -66,6 +65,6 @@ for element in range(len(heartbeats)):
 
 print('総心拍回数： ', mainCount)
 print('10秒おきの心拍数: ', countArray, len(countArray))
-duration_seconds = len(timestamps)*0.05
+duration_seconds = len(heartbeats)*0.05
 print('平均心拍数: ', mainCount/duration_seconds*60, '回/分')
 print('計測時間: ', duration_seconds, '秒')
