@@ -16,6 +16,16 @@ all_beat_count = 0
 heartbeats = []
 flag = None  # True: 上昇中, False: 下降中
 
+def read_and_record_data(ser, writer):
+    line = ser.readline().decode('utf-8').strip()
+    heart_value = int(line)
+
+    # タイムスタンプはCSV内のデータ用
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    data = [timestamp, heart_value]
+    writer.writerow(data)
+    return heart_value, data
+
 
 
 try:
@@ -24,14 +34,8 @@ try:
         start_time = time.time()
 
         while True:
-            line = ser.readline().decode('utf-8').strip()
-            current_time = time.time()
-            heart_value = int(line)
-
-            # タイムスタンプはCSV内のデータ用
-            timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            data = [timestamp, heart_value]
-            writer.writerow(data)
+            
+            heart_value, data = read_and_record_data(ser, writer)
             get_count = get_count + 1
             print(get_count, data)
 
