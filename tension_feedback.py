@@ -3,7 +3,7 @@ import datetime
 import csv
 import time
 
-serial_port = '/dev/cu.usbmodem11101'
+serial_port = '/dev/cu.usbmodem1201'
 baud_rate = 38400
 timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M")
 output_file = 'pulse_data_' + timestamp + '.csv'
@@ -11,14 +11,11 @@ output_file = 'pulse_data_' + timestamp + '.csv'
 preValue = None
 threshold_count = 5
 get_count = 0
-beat_count = 0
+beat_count_10seconds = 0
+all_beat_count = 0
 heartbeats = []
 flag = None  # True: 上昇中, False: 下降中
 
-
-def calculate_heart_rate(heartbeats, time_window=10):
-    beats_per_minute = len(heartbeats) * 6  # 10秒間の心拍数 × 6
-    return beats_per_minute
 
 
 try:
@@ -38,6 +35,12 @@ try:
             get_count = get_count + 1
             print(get_count, data)
 
+            if (get_count % 200 == 0 and get_count != 0):
+                beats_per_minute = beat_count_10seconds * 6  # 10秒間の心拍数 × 6
+                print(f"10秒毎の平均心拍数: {beats_per_minute} bpm")
+                heartbeats.append(beats_per_minute)
+                beat_count_10seconds = 0
+
             # 初期状態の判断
             if preValue is None:
                 print('初期値なし')
@@ -54,7 +57,8 @@ try:
                 # 上昇中
                 if (preValue > heart_value):
                     # 上昇中でピークとなった時
-                    beat_count = beat_count + 1
+                    beat_count_10seconds = beat_count_10seconds + 1
+                    all_beat_count = all_beat_count+1
                     flag = False
                     threshold_count = 1
                     print('ピーク -♡-',)
@@ -73,28 +77,8 @@ try:
                 preValue = heart_value
                 threshold_count = threshold_count + 1
 
-            # 心拍数の計算
-            # if heart_value < preValue and flag and threshold_count > 4:
-            #     # 波形がピーク（上昇から下降への変化）を示す場合
-            #     count += 1
-            #     heartbeats.append(heart_value)
-            #     threshold_count = 0
-            #     flag = False  # 下降フラグに切り替え
-            # else:
-            #     # ピークが検出されない場合
-            #     if heart_value > preValue:
-            #         flag = True  # 上昇フラグに切り替え
-            #     threshold_count += 1  # 閾値カウンターをインクリメント
-
-            # preValue = heart_value  # 現在の値を保存
-
-            # # 10秒ごとに平均心拍数を計算
-            # if current_time - start_time >= time_window:
-            #     bpm = calculate_heart_rate(heartbeats)
-            #     print(f"10秒毎の平均心拍数: {bpm} bpm")
-            #     heartbeats = []
-            #     start_time = current_time
 
 except KeyboardInterrupt:
     print("プログラムを終了します")
-    print('心拍数: ', beat_count)
+    print('心拍数: ', all_beat_count)
+    print('10秒毎の心拍数: ', heartbeats)
